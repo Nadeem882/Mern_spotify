@@ -25,7 +25,7 @@ async function registerUser(req , res) {
     const user = await userModel.create({
         username , 
         email ,
-        password ,
+        password : hash ,
         role
     })
 
@@ -45,6 +45,49 @@ async function registerUser(req , res) {
             role : user.role ,
         }
     })
+
 }
 
-module.exports = { registerUser }
+async function loginUser(req , res) {
+    const { username , email , password } = req.body;
+
+    const user = await userModel.findOne({
+        $or : [
+            {email} ,
+            {username} ]
+    })
+
+    if (!user)  {
+        return res.status(201).json({
+            message : "Invalid credentials"
+        })
+    }
+
+    const isPasswordValid = await bcrypt.compare(password , user.password)
+
+    if (!isPasswordValid) {
+      return res.status(201).json({
+            message : "Invalid credentials"
+        })
+    }
+
+    const token = jwt.sign({
+        id : user._id,
+        role :user.role,
+    }, process.env.JWT_SECRET)
+
+    res.cookie("token",token);
+
+    res.status(201).json({
+        message : "User logged in successfully" ,
+        user : {
+            id : user._id,
+            username : user.email ,
+            email : user.email ,
+            role : user.role ,
+        }
+    })
+    
+}
+
+module.exports = { registerUser , loginUser }
