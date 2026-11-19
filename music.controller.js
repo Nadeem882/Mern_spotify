@@ -69,7 +69,7 @@ async function createAlbum(req , res) {
             })
         }
 
-        const { title , musicIds } = req.body;
+        const { title , musics } = req.body;
 
         const album = await albumModel.create({
             title ,
@@ -83,7 +83,7 @@ async function createAlbum(req , res) {
                 id : album._id ,
                 title : album.title ,
                 artist : album.artist ,
-                musics : album.musics ,
+                musicIds : album.musics ,
             }
         })
 
